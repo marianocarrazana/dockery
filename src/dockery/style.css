@@ -6,3 +6,25 @@ ContainerWidget {
   min-width: 50;
   padding: 1;
 }
+
+.container-info {
+  width: 40;
+}
+
+.status-text {
+  width: 10;
+  padding: 1;
+  text-align: center;
+}
+
+StatusButtons Button {
+  margin: 0 2;
+}
+
+.running {
+  background: $error;
+}
+
+.exited {
+  background: $success;
+}

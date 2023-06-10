@@ -1,0 +1,31 @@
+
+[project]
+name = "dockery"
+version = "0.1.0"
+description = "Graphical interface for Docker in your console"
+authors = [
+    {name = "Mariano Carrazana", email = "marianocarrazana@gmail.com"},
+]
+dependencies = [
+    "docker>=6.1.3",
+    "textual>=0.27.0",
+    "click>=8.1.3",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project.scripts]
+dockery = "dockery.dockery:main"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "bandit>=1.7.5",
+    "black>=23.3.0",
+    "ruff>=0.0.272",
+    "debugpy>=1.6.7",
+]

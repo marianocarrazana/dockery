@@ -17,4 +17,17 @@ jobs:
       - uses: pdm-project/setup-pdm@v3
 
       - name: Publish package distributions to PyPI
-        run: pdm publish
+        id: publish_pypi
+        run: |
+          pdm publish --no-clean
+          export ARCHIVE=$(ls dist | grep tar.gz)
+          echo "archive=${ARCHIVE}" >> $GITHUB_OUTPUT
+
+      - name: Create Github release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            ./${{ steps.publish_pypi.outputs.archive }}
+          body: "Dockery Release"

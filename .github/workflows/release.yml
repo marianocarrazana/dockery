@@ -19,7 +19,7 @@ jobs:
       - name: Publish package distributions to PyPI
         id: publish_pypi
         run: |
-          pdm publish --no-clean
+          pdm publish
           export ARCHIVE=$(ls dist | grep tar.gz)
           echo "archive=${ARCHIVE}" >> $GITHUB_OUTPUT
 

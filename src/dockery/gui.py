@@ -13,8 +13,11 @@ from textual.containers import (
     Vertical,
     Container as Group,
 )
+from textual.reactive import reactive
 from docker import DockerClient
 from docker.models.containers import Container
+
+from .utils import get_cpu_usage, get_mem_usage
 
 
 class AppGUI(App):
@@ -41,7 +44,7 @@ class AppGUI(App):
     def on_mount(self) -> None:
         cl = self.query_one("#container-list")
         for c in self.docker.containers.list(all=True):
-            cw = ContainerWidget(c)  # type: ignore
+            cw = ContainerWidget(c, self.docker)  # type: ignore
             cl.mount(cw)
 
     def action_home(self) -> None:
@@ -49,8 +52,10 @@ class AppGUI(App):
 
 
 class ContainerWidget(Static):
-    def __init__(self, container: Container, **kargs):
+    def __init__(self, container: Container, client: DockerClient, **kargs):
         self.container = container
+        self.client = client
+        self.container_id = container.id
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
@@ -59,8 +64,41 @@ class ContainerWidget(Static):
             Static(self.container.short_id),
             classes="container-info",
         )
-        yield Vertical(Static(self.container.status), classes="status-text")
+        yield Vertical(
+            ReactiveString(id="status"),
+            ReactiveString(id="cpu"),
+            ReactiveString(id="mem"),
+            classes="status-text",
+        )
         yield Group(StatusButtons(self.container))
+
+    def on_mount(self):
+        self.set_interval(1, self.update_data)
+        # self.set_interval(4, self.update_usage) # TODO: is very slow
+
+    def update_data(self) -> None:
+        c: Container = self.client.containers.get(self.container_id)  # type: ignore
+        self.container = c
+        self.query_one("#status", ReactiveString).value = c.status.capitalize()
+
+    async def update_usage(self) -> None:
+        c = self.container
+        cpu = self.query_one("#cpu", ReactiveString)
+        mem = self.query_one("#mem", ReactiveString)
+        if c.status == "running":
+            stats = c.stats(decode=None, stream=False)  # slow af
+            cpu.value = f"CPU: {get_cpu_usage(stats):.1f}"
+            mem.value = f"MEM: {get_mem_usage(stats):.1f}"
+        else:
+            cpu.value = "CPU: -"
+            mem.value = "MEM: -"
+
+
+class ReactiveString(Static):
+    value = reactive("")
+
+    def render(self) -> str:
+        return self.value
 
 
 class StatusButtons(Static):

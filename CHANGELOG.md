@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.1
+
+* Update automatically the container status
+
 ## 0.2.0
 
 * Add `df`, `volumes`, `ps` and `stats` cli commands

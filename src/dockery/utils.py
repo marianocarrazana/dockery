@@ -13,8 +13,7 @@ def get_cpu_usage(stats: dict) -> float:
         return 0.0
 
     percentage = (delta / system_delta) * len_cpu * 100
-    percent = round(percentage, 2)
-    return percent
+    return percentage
 
 
 def get_mem_usage(stats: dict) -> float:
@@ -23,9 +22,9 @@ def get_mem_usage(stats: dict) -> float:
         return 0.0
     mem_used = (
         mem_stats["usage"]
-        - mem_stats["stats"]["cache"]
+        - mem_stats["stats"].get("cache", 0)
         + mem_stats["stats"]["active_file"]
     )
     limit = stats["memory_stats"]["limit"]
-    percent = round(mem_used / limit * 100, 2)
-    return percent
+    percentage = mem_used / limit * 100
+    return percentage

@@ -12,8 +12,7 @@ ContainerWidget {
 }
 
 .status-text {
-  width: 10;
-  padding: 1;
+  width: 12;
   text-align: center;
 }
 

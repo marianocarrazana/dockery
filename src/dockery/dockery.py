@@ -4,7 +4,6 @@ import click
 from rich import print
 
 from .gui import AppGUI
-from .utils import get_cpu_usage
 
 default_options = [
     click.option(

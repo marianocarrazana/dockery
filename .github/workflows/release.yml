@@ -26,5 +26,5 @@ jobs:
         with:
           draft: true
           prerelease: true
-          generate_release_notes: true
+          # generate_release_notes: true
           body_path: CHANGELOG.md

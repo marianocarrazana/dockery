@@ -1,5 +1,7 @@
 import docker
 from docker.models.containers import Container
+from docker.models.volumes import Volume
+from docker.models.images import Image
 import click
 from rich import print
 
@@ -60,8 +62,8 @@ def df(**kargs):
 @add_options(default_options)
 def volumes(**kargs):
     client = get_client(**kargs)
-    volumes = client.volumes.list()
-    for v in volumes:
+    vlms: list[Volume] = client.volumes.list()  # type: ignore
+    for v in vlms:
         print(v.attrs)
 
 
@@ -88,10 +90,20 @@ def stats(**kargs):
         print(stats)
 
 
+@click.command
+@add_options(default_options)
+def images(**kargs):
+    client = get_client(**kargs)
+    imgs: list[Image] = client.images.list()  # type: ignore
+    for i in imgs:
+        print(i.attrs)
+
+
 main.add_command(df)
 main.add_command(volumes)
 main.add_command(ps)
 main.add_command(stats)
+main.add_command(images)
 
 if __name__ == "__main__":
     main()

@@ -1,17 +1,9 @@
 # Change Log
 
-## 0.2.1
+## :zap: New Features
 
-* Update automatically the container status
+* Nothing new :disappointed:
 
-## 0.2.0
+## :lady_beetle: Fixes
 
-* Add `df`, `volumes`, `ps` and `stats` cli commands
-
-## 0.1.1
-
-* Add `--server`, `--ssh` and `--api-version` cli parameters
-
-## 0.1.0
-
-* First public release
+* No fixes for now :sweat_smile:

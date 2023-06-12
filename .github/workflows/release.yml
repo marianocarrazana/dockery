@@ -19,17 +19,12 @@ jobs:
 
       - name: Publish package distributions to PyPI
         id: publish_pypi
-        run: |
-          pdm publish
-          export ARCHIVE=$(ls dist | grep tar.gz)
-          echo "archive=${ARCHIVE}" >> $GITHUB_OUTPUT
+        run: pdm publish
 
       - name: Create Github release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
+          prerelease: true
           generate_release_notes: true
-          files: |
-            ./dist/${{ steps.publish_pypi.outputs.archive }}
           body_path: CHANGELOG.md
-          body: "Release"

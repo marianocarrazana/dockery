@@ -1,7 +1,7 @@
 
 [project]
 name = "dockery"
-version = "0.2.1"
+version = "0.2.2"
 description = "Graphical interface for Docker in your console"
 authors = [
     {name = "Mariano Carrazana", email = "marianocarrazana@gmail.com"},

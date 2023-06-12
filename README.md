@@ -32,4 +32,14 @@ Run on your console:
 dockery
 ```
 
+## Extra commands
+
+```bash
+dockery df
+dockery ps
+dockery volumes
+dockery images
+dockery stats
+```
+
 ## **Enjoy it!**

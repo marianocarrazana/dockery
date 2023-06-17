@@ -1,7 +1,7 @@
 
 [project]
 name = "dockery"
-version = "0.2.3"
+version = "0.2.4"
 description = "Graphical interface for Docker in your console"
 authors = [
     {name = "Mariano Carrazana", email = "marianocarrazana@gmail.com"},
@@ -29,3 +29,7 @@ dev = [
     "ruff>=0.0.272",
     "debugpy>=1.6.7",
 ]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/marianocarrazana/dockery/issues"
+"Source Code" = "https://github.com/marianocarrazana/dockery"

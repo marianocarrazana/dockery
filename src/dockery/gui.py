@@ -1,3 +1,4 @@
+import threading
 from rich.text import TextType
 from textual.app import App, ComposeResult
 from textual.widgets import (
@@ -14,7 +15,8 @@ from textual.containers import (
     Container as Group,
 )
 from textual.reactive import reactive
-from docker import DockerClient
+from textual.css import query
+from docker import DockerClient, errors
 from docker.models.containers import Container
 
 from .utils import get_cpu_usage, get_mem_usage
@@ -28,9 +30,11 @@ class AppGUI(App):
         ("q", "quit", "Quit"),
     ]
     TITLE = "DOCKERY"
+    container_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
         self.docker = docker
+        self.containers = []
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
@@ -41,17 +45,37 @@ class AppGUI(App):
             with VerticalScroll(id="container-logs"):
                 yield Static("", id="logs")
 
-    def on_mount(self) -> None:
-        cl = self.query_one("#container-list")
-        for c in self.docker.containers.list(all=True):
-            cw = ContainerWidget(c, self.docker)  # type: ignore
-            cl.mount(cw)
-
     def action_home(self) -> None:
         self.query_one(ContentSwitcher).current = "container-list"
 
+    def on_mount(self) -> None:
+        self.get_containers()
+        self.set_interval(2, self.count_timer)
+
+    def count_timer(self) -> None:
+        thread = threading.Thread(target=self.get_containers)
+        thread.start()
+
+    def watch_container_count(self, count: int) -> None:
+        print(f"{count=}")
+        cl = self.app.query_one("#container-list")
+        cl.remove_children()
+        for c in self.containers:
+            c_id = f"c{c.short_id}"
+            try:
+                cl.query_one(f"#{c_id}")
+            except query.NoMatches:
+                cw = ContainerWidget(c, self.docker, id=c_id)  # type: ignore
+                cl.mount(cw)
+
+    def get_containers(self) -> None:
+        self.containers = self.docker.containers.list(all=True)
+        self.container_count = len(self.containers)
+
 
 class ContainerWidget(Static):
+    not_found = reactive(False)
+
     def __init__(self, container: Container, client: DockerClient, **kargs):
         self.container = container
         self.client = client
@@ -73,25 +97,48 @@ class ContainerWidget(Static):
         yield Group(StatusButtons(self.container))
 
     def on_mount(self):
-        self.set_interval(1, self.update_data)
-        # self.set_interval(4, self.update_usage) # TODO: is very slow
+        self.set_interval(1, self.data_timer)
+        self.set_interval(4, self.usage_timer)
+
+    def watch_not_found(self, remove):
+        print(f"{remove=}")
+        if remove:
+            print("Removing....")
+            self.remove()
+
+    def data_timer(self) -> None:
+        thread = threading.Thread(target=self.update_data)
+        thread.start()
 
     def update_data(self) -> None:
-        c: Container = self.client.containers.get(self.container_id)  # type: ignore
-        self.container = c
-        self.query_one("#status", ReactiveString).value = c.status.capitalize()
+        try:
+            c: Container = self.client.containers.get(self.container_id)  # type: ignore
+        except errors.NotFound:
+            self.not_found = True
+        else:
+            self.container = c
+            self.query_one("#status", ReactiveString).value = c.status.capitalize()
 
-    async def update_usage(self) -> None:
+    def usage_timer(self) -> None:
+        thread = threading.Thread(target=self.update_usage)
+        thread.start()
+
+    def update_usage(self) -> None:
+        print("Updating stats")
         c = self.container
         cpu = self.query_one("#cpu", ReactiveString)
         mem = self.query_one("#mem", ReactiveString)
         if c.status == "running":
-            stats = c.stats(decode=None, stream=False)  # slow af
-            cpu.value = f"CPU: {get_cpu_usage(stats):.1f}"
-            mem.value = f"MEM: {get_mem_usage(stats):.1f}"
+            try:
+                stats = c.stats(decode=None, stream=False)
+            except Exception:
+                return None
+            else:
+                cpu.value = f"CPU: {get_cpu_usage(stats):.1f}"
+                mem.value = f"MEM: {get_mem_usage(stats):.1f}"
         else:
-            cpu.value = "CPU: -"
-            mem.value = "MEM: -"
+            cpu.value = ""
+            mem.value = ""
 
 
 class ReactiveString(Static):

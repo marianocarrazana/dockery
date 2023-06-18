@@ -15,7 +15,6 @@ from textual.containers import (
     Container as Group,
 )
 from textual.reactive import reactive
-from textual.css import query
 from docker import DockerClient, errors
 from docker.models.containers import Container
 
@@ -30,23 +29,30 @@ class AppGUI(App):
         ("q", "quit", "Quit"),
     ]
     TITLE = "DOCKERY"
-    container_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
         self.docker = docker
-        self.containers = []
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Footer()
         with ContentSwitcher(initial="container-list"):
-            yield VerticalScroll(id="container-list")
+            yield VerticalScroll(ContainersList(self.docker), id="container-list")
             with VerticalScroll(id="container-logs"):
                 yield Static("", id="logs")
 
     def action_home(self) -> None:
         self.query_one(ContentSwitcher).current = "container-list"
+
+
+class ContainersList(Static):
+    container_count = reactive(0)
+
+    def __init__(self, docker: DockerClient, **kargs):
+        self.containers = []
+        self.docker = docker
+        super().__init__(**kargs)
 
     def on_mount(self) -> None:
         self.get_containers()
@@ -56,17 +62,11 @@ class AppGUI(App):
         thread = threading.Thread(target=self.get_containers)
         thread.start()
 
-    def watch_container_count(self, count: int) -> None:
-        print(f"{count=}")
-        cl = self.app.query_one("#container-list")
-        cl.remove_children()
+    async def watch_container_count(self, count: int) -> None:
+        await self.remove_children()
         for c in self.containers:
-            c_id = f"c{c.short_id}"
-            try:
-                cl.query_one(f"#{c_id}")
-            except query.NoMatches:
-                cw = ContainerWidget(c, self.docker, id=c_id)  # type: ignore
-                cl.mount(cw)
+            cw = ContainerWidget(c, self.docker)  # type: ignore
+            self.mount(cw)
 
     def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)
@@ -74,8 +74,6 @@ class AppGUI(App):
 
 
 class ContainerWidget(Static):
-    not_found = reactive(False)
-
     def __init__(self, container: Container, client: DockerClient, **kargs):
         self.container = container
         self.client = client
@@ -100,12 +98,6 @@ class ContainerWidget(Static):
         self.set_interval(1, self.data_timer)
         self.set_interval(4, self.usage_timer)
 
-    def watch_not_found(self, remove):
-        print(f"{remove=}")
-        if remove:
-            print("Removing....")
-            self.remove()
-
     def data_timer(self) -> None:
         thread = threading.Thread(target=self.update_data)
         thread.start()
@@ -114,7 +106,7 @@ class ContainerWidget(Static):
         try:
             c: Container = self.client.containers.get(self.container_id)  # type: ignore
         except errors.NotFound:
-            self.not_found = True
+            return None
         else:
             self.container = c
             self.query_one("#status", ReactiveString).value = c.status.capitalize()
@@ -124,7 +116,6 @@ class ContainerWidget(Static):
         thread.start()
 
     def update_usage(self) -> None:
-        print("Updating stats")
         c = self.container
         cpu = self.query_one("#cpu", ReactiveString)
         mem = self.query_one("#mem", ReactiveString)

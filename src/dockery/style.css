@@ -7,8 +7,28 @@ ContainerWidget {
     padding: 1;
 }
 
+Footer{
+ background: $background-lighten-2;
+}
+
+Footer .footer--description {
+    background: transparent;
+}
+
+.footer--key {
+    background: $primary-background-lighten-2 ;
+}
+
+.footer--highlight	{
+  background: $background-lighten-3;
+}
+
+.footer--highlight-key	{
+  background: $primary-background-lighten-3;
+}
+
 .container-info {
-    width: 30;
+    width: 1fr;
 }
 
 .status-text {
@@ -16,8 +36,13 @@ ContainerWidget {
     text-align: center;
 }
 
+StatusButtons {
+    width: 1fr;
+}
+
 StatusButtons Button {
     margin: 0 2;
+    width: 1fr;
 }
 
 .running {

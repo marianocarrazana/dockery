@@ -4,6 +4,7 @@
 
 - Add cpu and memory usage for every container
 - Logs are constantly updated now
+- Small changes in the interface
 
 ## :lady_beetle: Fixes
 

@@ -2,13 +2,9 @@
 
 ## :zap: New Features
 
-- No new features sorry :disappointed:
+- Add cpu and memory usage for every container
+- Logs are constantly updated now
 
 ## :lady_beetle: Fixes
 
-- No fixes for now :sweat_smile:
-
-## Others
-
-- Update package info
-- Add textual launch for vscode
+- When you add or remove a new container the program does not ends abruptly... or not always at least :sweat_smile:

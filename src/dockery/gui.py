@@ -19,6 +19,7 @@ from docker import DockerClient, errors
 from docker.models.containers import Container
 
 from .utils import get_cpu_usage, get_mem_usage
+from .logs import LogsButton
 
 
 class AppGUI(App):
@@ -96,10 +97,12 @@ class ContainerWidget(Static):
 
     def on_mount(self):
         self.set_interval(1, self.data_timer)
-        self.set_interval(4, self.usage_timer)
+        self.running = True
+        thread = threading.Thread(target=self.update_usage, daemon=True)
+        thread.start()
 
     def data_timer(self) -> None:
-        thread = threading.Thread(target=self.update_data)
+        thread = threading.Thread(target=self.update_data, daemon=True)
         thread.start()
 
     def update_data(self) -> None:
@@ -111,25 +114,18 @@ class ContainerWidget(Static):
             self.container = c
             self.query_one("#status", ReactiveString).value = c.status.capitalize()
 
-    def usage_timer(self) -> None:
-        thread = threading.Thread(target=self.update_usage)
-        thread.start()
-
     def update_usage(self) -> None:
         c = self.container
         cpu = self.query_one("#cpu", ReactiveString)
         mem = self.query_one("#mem", ReactiveString)
-        if c.status == "running":
-            try:
-                stats = c.stats(decode=None, stream=False)
-            except Exception:
+        for stat in c.stats(stream=True, decode=True):
+            if not self.running:  # finish the thread
                 return None
-            else:
-                cpu.value = f"CPU: {get_cpu_usage(stats):.1f}"
-                mem.value = f"MEM: {get_mem_usage(stats):.1f}"
-        else:
-            cpu.value = ""
-            mem.value = ""
+            cpu.value = f"CPU: {get_cpu_usage(stat):.1f}"
+            mem.value = f"MEM: {get_mem_usage(stat):.1f}"
+
+    def on_unmount(self):
+        self.running = False
 
 
 class ReactiveString(Static):
@@ -190,22 +186,3 @@ class RestartButton(Button):
 
     def render(self) -> TextType:
         return "Restart"
-
-
-class LogsButton(Button):
-    def __init__(self, container: Container, **kargs):
-        self.container = container
-        super().__init__(**kargs)
-
-    def on_click(self) -> None:
-        logs: bytes = self.container.logs(tail=20)
-        cl = self.app.query_one("#logs")
-        lw = Static(logs.decode())
-        cl.mount(lw)
-        self.app.query_one(ContentSwitcher).current = "container-logs"
-
-    def on_mount(self) -> None:
-        self.variant = "primary"
-
-    def render(self) -> TextType:
-        return "Logs"

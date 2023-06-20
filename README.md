@@ -2,8 +2,15 @@
 
 Graphical interface for Docker in your console
 
-| ![capture1](https://github.com/marianocarrazana/dockery/assets/17238076/a97f7854-2961-4cab-8596-0f3e3d48224c) | ![capture2](https://github.com/marianocarrazana/dockery/assets/17238076/c656e616-387b-456d-a921-0d836ebaabc4) |
-|-|-|
+<table>
+  <tr>
+    <td><img src="https://github.com/marianocarrazana/dockery/assets/17238076/3c987e47-2d86-44ae-a078-73eced62dc11"/></td>
+    <td><img src="https://github.com/marianocarrazana/dockery/assets/17238076/26dc43c9-1dd0-4097-ac02-aa006c3ff6b6"/></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="https://github.com/marianocarrazana/dockery/assets/17238076/c991ff4b-eebf-4495-b67c-2c57e933bd7d" /></td>
+  </tr>
+</table>
 
 ## Installation
 

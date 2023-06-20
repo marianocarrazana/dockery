@@ -1,14 +1,14 @@
 ContainerWidget {
     layout: horizontal;
     background: $boost;
-    height: 5;
+    height: 3;
     margin: 1;
     min-width: 50;
-    padding: 1;
+    padding: 0 2;
 }
 
-Footer{
- background: $background-lighten-2;
+Footer {
+    background: $background-lighten-2;
 }
 
 Footer .footer--description {
@@ -16,39 +16,48 @@ Footer .footer--description {
 }
 
 .footer--key {
-    background: $primary-background-lighten-2 ;
+    background: $primary-background-lighten-2;
 }
 
-.footer--highlight	{
-  background: $background-lighten-3;
+.footer--highlight {
+    background: $background-lighten-3;
 }
 
-.footer--highlight-key	{
-  background: $primary-background-lighten-3;
+.footer--highlight-key {
+    background: $primary-background-lighten-3;
 }
 
 .container-info {
     width: 1fr;
 }
 
-.status-text {
+.stats-text {
+    width: 1fr;
+}
+
+.stats-text > Horizontal > ReactiveString {
     width: 12;
-    text-align: center;
+    height: 1;
 }
 
-StatusButtons {
-    width: 1fr;
+CustomButton {
+    height: 3;
+    padding: 1 2;
+    width: auto;
 }
 
-StatusButtons Button {
-    margin: 0 2;
-    width: 1fr;
+CustomButton:hover {
+    text-style: bold;
 }
 
-.running {
-    background: $error;
+LogsButton {
+    width: 10;
 }
 
-.exited {
-    background: $success;
+RestartButton {
+    width: 14;
+}
+
+StartStopButton {
+    width: 11;
 }

@@ -1,13 +1,7 @@
 import threading
 from rich.text import TextType
 from textual.app import App, ComposeResult
-from textual.widgets import (
-    Footer,
-    Header,
-    Static,
-    Button,
-    ContentSwitcher,
-)
+from textual.widgets import Footer, Header, Static, ContentSwitcher, Button
 from textual.containers import (
     VerticalScroll,
     Horizontal,
@@ -20,6 +14,7 @@ from docker.models.containers import Container
 
 from .utils import get_cpu_usage, get_mem_usage
 from .logs import LogsButton
+from .buttons import CustomButton
 
 
 class AppGUI(App):
@@ -83,16 +78,15 @@ class ContainerWidget(Static):
 
     def compose(self) -> ComposeResult:
         yield Group(
-            Static(self.container.name or ""),
-            Static(self.container.short_id),
+            Static("[b]" + (self.container.name or "")),
+            Vertical(
+                ReactiveString(id="status"),
+                Horizontal(ReactiveString(id="cpu"), ReactiveString(id="mem")),
+                classes="stats-text",
+            ),
             classes="container-info",
         )
-        yield Vertical(
-            ReactiveString(id="status"),
-            ReactiveString(id="cpu"),
-            ReactiveString(id="mem"),
-            classes="status-text",
-        )
+
         yield Group(StatusButtons(self.container))
 
     def on_mount(self):
@@ -112,7 +106,10 @@ class ContainerWidget(Static):
             return None
         else:
             self.container = c
-            self.query_one("#status", ReactiveString).value = c.status.capitalize()
+            status = c.status.capitalize()
+            self.query_one("#status", ReactiveString).text = (
+                "[green]" if status == "Running" else "[bright_black]"
+            ) + status
 
     def update_usage(self) -> None:
         c = self.container
@@ -121,39 +118,41 @@ class ContainerWidget(Static):
         for stat in c.stats(stream=True, decode=True):
             if not self.running:  # finish the thread
                 return None
-            cpu.value = f"CPU: {get_cpu_usage(stat):.1f}"
-            mem.value = f"MEM: {get_mem_usage(stat):.1f}"
+            cpu.text = f"CPU: {get_cpu_usage(stat):.1f}"
+            mem.text = f"MEM: {get_mem_usage(stat):.1f}"
 
     def on_unmount(self):
         self.running = False
 
 
 class ReactiveString(Static):
-    value = reactive("")
+    text = reactive("")
+
+    def __init__(self, **kargs):
+        super().__init__(shrink=True, expand=True, **kargs)
 
     def render(self) -> str:
-        return self.value
+        return self.text
 
 
 class StatusButtons(Static):
     def __init__(self, container: Container, **kargs):
         self.container = container
-        self.button = StartStopButton(container)
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
         yield Horizontal(
-            self.button,
+            StartStopButton(self.container),
             RestartButton(self.container),
             LogsButton(self.container),
-            # Button("Details"),
             classes="buttons-container",
         )
 
 
-class StartStopButton(Button):
+class StartStopButton(Static):
+    running = reactive(bool)
+
     def __init__(self, container: Container, **kargs):
-        self.running = container.status == "running"
         self.container = container
         super().__init__(**kargs)
 
@@ -163,17 +162,22 @@ class StartStopButton(Button):
             self.container.start()
         else:
             self.container.stop()
-        self.on_mount()
 
     def on_mount(self) -> None:
-        self.variant = "error" if self.running else "success"
-        self.text = "Stop" if self.running else "Start"
+        self.running = self.container.status == "running"
 
-    def render(self) -> TextType:
-        return self.text
+    def watch_running(self, running: bool):
+        self.variant = "error" if running else "success"
+        text = ":black_square_button:Stop" if running else ":arrow_forward: Start"
+        btn = self.query_one(CustomButton)
+        btn.text = text
+        btn.color = "red" if running else "green"
+
+    def compose(self) -> ComposeResult:
+        yield CustomButton("Start")
 
 
-class RestartButton(Button):
+class RestartButton(Static):
     def __init__(self, container: Container, **kargs):
         self.container = container
         super().__init__(**kargs)
@@ -181,8 +185,5 @@ class RestartButton(Button):
     def on_click(self) -> None:
         self.container.restart()
 
-    def on_mount(self) -> None:
-        self.variant = "warning"
-
-    def render(self) -> TextType:
-        return "Restart"
+    def compose(self) -> ComposeResult:
+        yield CustomButton(":grey_exclamation:Restart", color="orange")

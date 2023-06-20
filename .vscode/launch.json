@@ -11,7 +11,7 @@
             "name": "Python: Textual",
             "request": "launch",
             "type": "node-terminal",
-            "command": "textual run -c dockery"
+            "command": "textual run --dev -c dockery"
         }
     ]
 }

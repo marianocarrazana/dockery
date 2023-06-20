@@ -1,12 +1,13 @@
 import threading
 import time
-from rich.text import TextType
-from textual.widgets import Static, Button, ContentSwitcher
+from textual.app import ComposeResult
+from textual.widgets import Static, ContentSwitcher
 from textual.reactive import reactive
 from docker.models.containers import Container
+from .buttons import CustomButton
 
 
-class LogsButton(Button):
+class LogsButton(Static):
     def __init__(self, container: Container, **kargs):
         self.container = container
         super().__init__(**kargs)
@@ -18,11 +19,8 @@ class LogsButton(Button):
         await cl.mount(lc)
         self.app.query_one(ContentSwitcher).current = "container-logs"
 
-    def on_mount(self) -> None:
-        self.variant = "primary"
-
-    def render(self) -> TextType:
-        return "Logs"
+    def compose(self) -> ComposeResult:
+        yield CustomButton(":notebook:Logs", color="blue")
 
 
 class LogsContainer(Static):

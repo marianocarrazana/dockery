@@ -1,9 +1,10 @@
 import threading
 import time
 from textual.app import ComposeResult
-from textual.widgets import Static, ContentSwitcher
+from textual.widgets import Static, TextLog, Tabs
 from textual.reactive import reactive
 from docker.models.containers import Container
+
 from .buttons import CustomButton
 
 
@@ -17,19 +18,19 @@ class LogsButton(Static):
         await cl.remove_children()
         lc = LogsContainer(self.container)
         await cl.mount(lc)
-        self.app.query_one(ContentSwitcher).current = "container-logs"
+        self.app.query_one("#nav", Tabs).active = "container-logs"
 
     def compose(self) -> ComposeResult:
         yield CustomButton(":notebook:Logs", color="blue")
 
 
-class LogsContainer(Static):
+class LogsContainer(TextLog):
     last_log = reactive("")
 
     def __init__(self, container: Container, **kargs):
         self.container = container
         self.log_container = self.app.query_one("#logs")
-        super().__init__(**kargs)
+        super().__init__(highlight=True, auto_scroll=True, wrap=True, **kargs)
 
     def on_mount(self) -> None:
         self.running = True
@@ -37,9 +38,7 @@ class LogsContainer(Static):
         self.thread.start()
 
     async def watch_last_log(self, new_log: str):
-        lw = Static(new_log)
-        await self.log_container.mount(lw)
-        lw.scroll_visible()
+        self.write(new_log)
 
     def update_log(self) -> None:
         # Get the last 40 logs(get all logs can be slow)

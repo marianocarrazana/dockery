@@ -2,10 +2,11 @@
 
 ## :zap: New Features
 
-- Add cpu and memory usage for every container
-- Logs are constantly updated now
-- Small changes in the interface
+- New colors, icons, buttons and more :heart_eyes:
+- Added tabs to the header :sunglasses:
+- Reduce size of elements in the containers list
+- Logs have new colors
 
 ## :lady_beetle: Fixes
 
-- When you add or remove a new container the program does not ends abruptly... or not always at least :sweat_smile:
+- Maybe theres a lot of new bugs :sweat_smile:

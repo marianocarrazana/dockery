@@ -1,14 +1,17 @@
 import threading
 from rich.text import TextType
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header, Static, ContentSwitcher, Button
+from textual.widgets import Footer, Static, ContentSwitcher, Tabs, Tab
+from textual.widgets._header import HeaderClock
 from textual.containers import (
     VerticalScroll,
     Horizontal,
     Vertical,
     Container as Group,
+    Grid,
 )
 from textual.reactive import reactive
+from textual.events import Resize
 from docker import DockerClient, errors
 from docker.models.containers import Container
 
@@ -20,7 +23,6 @@ from .buttons import CustomButton
 class AppGUI(App):
     CSS_PATH = "style.css"
     BINDINGS = [
-        ("h", "home", "Home"),
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "quit", "Quit"),
     ]
@@ -31,24 +33,34 @@ class AppGUI(App):
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
-        yield Header(show_clock=True)
+        with Horizontal(id="header"):
+            yield HeaderClock()
+            yield Tabs(
+                Tab("Containers", id="container-list"),
+                Tab("Logs", id="container-logs"),
+                id="nav",
+            )
         yield Footer()
-        with ContentSwitcher(initial="container-list"):
-            yield VerticalScroll(ContainersList(self.docker), id="container-list")
+        with ContentSwitcher():
+            yield ContainersList(self.docker, id="container-list")
             with VerticalScroll(id="container-logs"):
                 yield Static("", id="logs")
 
-    def action_home(self) -> None:
-        self.query_one(ContentSwitcher).current = "container-list"
+    def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
+        self.query_one(ContentSwitcher).current = event.tab.id
 
 
-class ContainersList(Static):
+class ContainersList(VerticalScroll):
     container_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
         self.containers = []
         self.docker = docker
+        self.grid = Grid()
         super().__init__(**kargs)
+
+    # def compose(self) -> ComposeResult:
+    #     yield self.grid
 
     def on_mount(self) -> None:
         self.get_containers()
@@ -59,14 +71,19 @@ class ContainersList(Static):
         thread.start()
 
     async def watch_container_count(self, count: int) -> None:
+        # await self.grid.remove_children()
         await self.remove_children()
         for c in self.containers:
             cw = ContainerWidget(c, self.docker)  # type: ignore
+            # self.grid.mount(cw)
             self.mount(cw)
 
     def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)
         self.container_count = len(self.containers)
+
+    # def on_resize(self, e: Resize):
+    #     print(e)
 
 
 class ContainerWidget(Static):
@@ -131,7 +148,7 @@ class ReactiveString(Static):
     def __init__(self, **kargs):
         super().__init__(shrink=True, expand=True, **kargs)
 
-    def render(self) -> str:
+    def render(self) -> TextType:
         return self.text
 
 

@@ -61,3 +61,17 @@ RestartButton {
 StartStopButton {
     width: 11;
 }
+
+TabPane {
+    height: 100;
+}
+
+#header {
+    dock: top;
+    height: 3;
+}
+
+HeaderClock {
+    height: 3;
+    background: transparent;
+}

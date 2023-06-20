@@ -1,7 +1,8 @@
 import threading
+import math
 from rich.text import TextType
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Static, ContentSwitcher, Tabs, Tab
+from textual.widgets import Footer, Static, ContentSwitcher, Tabs, Tab, Label
 from textual.widgets._header import HeaderClock
 from textual.containers import (
     VerticalScroll,
@@ -59,31 +60,39 @@ class ContainersList(VerticalScroll):
         self.grid = Grid()
         super().__init__(**kargs)
 
-    # def compose(self) -> ComposeResult:
-    #     yield self.grid
+    def compose(self) -> ComposeResult:
+        yield self.grid
 
     def on_mount(self) -> None:
         self.get_containers()
         self.set_interval(2, self.count_timer)
+        self.resize()
+        self.grid.styles.grid_columns = "1fr"
+        self.grid.styles.grid_rows = "4"
+        self.grid.styles.width = "100%"
+        self.grid.styles.height = "auto"
 
     def count_timer(self) -> None:
         thread = threading.Thread(target=self.get_containers)
         thread.start()
 
     async def watch_container_count(self, count: int) -> None:
-        # await self.grid.remove_children()
-        await self.remove_children()
+        await self.grid.remove_children()
         for c in self.containers:
             cw = ContainerWidget(c, self.docker)  # type: ignore
-            # self.grid.mount(cw)
-            self.mount(cw)
+            self.grid.mount(cw)
 
     def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)
         self.container_count = len(self.containers)
 
-    # def on_resize(self, e: Resize):
-    #     print(e)
+    def on_resize(self, e: Resize):
+        self.resize()
+
+    def resize(self):
+        min_container_width = 75
+        columns = math.floor(self.size.width / min_container_width)
+        self.grid.styles.grid_size_columns = columns
 
 
 class ContainerWidget(Static):
@@ -95,7 +104,7 @@ class ContainerWidget(Static):
 
     def compose(self) -> ComposeResult:
         yield Group(
-            Static("[b]" + (self.container.name or "")),
+            Label("[b]" + (self.container.name or ""), classes="container-name"),
             Vertical(
                 ReactiveString(id="status"),
                 Horizontal(ReactiveString(id="cpu"), ReactiveString(id="mem")),

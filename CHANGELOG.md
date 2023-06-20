@@ -6,6 +6,7 @@
 - Added tabs to the header :sunglasses:
 - Reduce size of elements in the containers list
 - Logs have new colors
+- Containers list now is responsive :sparkles:
 
 ## :lady_beetle: Fixes
 

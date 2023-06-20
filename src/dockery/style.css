@@ -75,3 +75,9 @@ HeaderClock {
     height: 3;
     background: transparent;
 }
+
+.container-name{
+    overflow-x: hidden;
+    max-width: 100%;
+    height: 1;
+}

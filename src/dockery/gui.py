@@ -18,7 +18,8 @@ from docker.models.containers import Container
 
 from .utils import get_cpu_usage, get_mem_usage
 from .logs import LogsButton
-from .buttons import CustomButton
+from .custom_widgets import CustomButton, ResponsiveGrid, ReactiveString
+from .images import ImagesList
 
 
 class AppGUI(App):
@@ -38,39 +39,31 @@ class AppGUI(App):
             yield HeaderClock()
             yield Tabs(
                 Tab("Containers", id="container-list"),
+                Tab("Images", id="image-list"),
                 Tab("Logs", id="container-logs"),
                 id="nav",
             )
         yield Footer()
         with ContentSwitcher():
             yield ContainersList(self.docker, id="container-list")
-            with VerticalScroll(id="container-logs"):
-                yield Static("", id="logs")
+            yield VerticalScroll(id="container-logs")
+            yield ImagesList(self.docker, id="image-list")
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
         self.query_one(ContentSwitcher).current = event.tab.id
 
 
-class ContainersList(VerticalScroll):
+class ContainersList(ResponsiveGrid):
     container_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
         self.containers = []
         self.docker = docker
-        self.grid = Grid()
         super().__init__(**kargs)
-
-    def compose(self) -> ComposeResult:
-        yield self.grid
 
     def on_mount(self) -> None:
         self.get_containers()
         self.set_interval(2, self.count_timer)
-        self.resize()
-        self.grid.styles.grid_columns = "1fr"
-        self.grid.styles.grid_rows = "4"
-        self.grid.styles.width = "100%"
-        self.grid.styles.height = "auto"
 
     def count_timer(self) -> None:
         thread = threading.Thread(target=self.get_containers)
@@ -85,14 +78,6 @@ class ContainersList(VerticalScroll):
     def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)
         self.container_count = len(self.containers)
-
-    def on_resize(self, e: Resize):
-        self.resize()
-
-    def resize(self):
-        min_container_width = 75
-        columns = math.floor(self.size.width / min_container_width)
-        self.grid.styles.grid_size_columns = columns
 
 
 class ContainerWidget(Static):
@@ -127,12 +112,11 @@ class ContainerWidget(Static):
 
     def update_data(self) -> None:
         try:
-            c: Container = self.client.containers.get(self.container_id)  # type: ignore
+            self.container.reload()
         except errors.NotFound:
             return None
         else:
-            self.container = c
-            status = c.status.capitalize()
+            status = self.container.status.capitalize()
             self.query_one("#status", ReactiveString).text = (
                 "[green]" if status == "Running" else "[bright_black]"
             ) + status
@@ -149,16 +133,6 @@ class ContainerWidget(Static):
 
     def on_unmount(self):
         self.running = False
-
-
-class ReactiveString(Static):
-    text = reactive("")
-
-    def __init__(self, **kargs):
-        super().__init__(shrink=True, expand=True, **kargs)
-
-    def render(self) -> TextType:
-        return self.text
 
 
 class StatusButtons(Static):

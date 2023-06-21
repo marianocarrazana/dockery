@@ -3,9 +3,10 @@ import time
 from textual.app import ComposeResult
 from textual.widgets import Static, TextLog, Tabs
 from textual.reactive import reactive
+from textual.containers import VerticalScroll
 from docker.models.containers import Container
 
-from .buttons import CustomButton
+from .custom_widgets import CustomButton
 
 
 class LogsButton(Static):
@@ -14,7 +15,7 @@ class LogsButton(Static):
         super().__init__(**kargs)
 
     async def on_click(self) -> None:
-        cl = self.app.query_one("#logs")
+        cl = self.app.query_one("VerticalScroll#container-logs", VerticalScroll)
         await cl.remove_children()
         lc = LogsContainer(self.container)
         await cl.mount(lc)
@@ -29,7 +30,6 @@ class LogsContainer(TextLog):
 
     def __init__(self, container: Container, **kargs):
         self.container = container
-        self.log_container = self.app.query_one("#logs")
         super().__init__(highlight=True, auto_scroll=True, wrap=True, **kargs)
 
     def on_mount(self) -> None:

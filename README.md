@@ -27,7 +27,7 @@ git pull
 ### From pip
 
 ```shell
-pip install dockery
+pip install -U dockery
 ```
 
 ## Usage

@@ -1,4 +1,7 @@
-ContainerWidget, ImageWidget, NetworkWidget {
+ContainerWidget,
+ImageWidget,
+NetworkWidget,
+VolumeWidget {
     layout: horizontal;
     background: $boost;
     height: 3;
@@ -76,7 +79,7 @@ HeaderClock {
     background: transparent;
 }
 
-.container-name{
+.container-name {
     overflow-x: hidden;
     max-width: 100%;
     height: 1;

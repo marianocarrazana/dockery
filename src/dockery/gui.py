@@ -17,6 +17,7 @@ from .logs import LogsButton
 from .custom_widgets import CustomButton, ResponsiveGrid, ReactiveString
 from .images import ImagesList
 from .networks import NetworkList
+from .volumes import VolumesList
 
 
 class AppGUI(App):
@@ -38,6 +39,7 @@ class AppGUI(App):
                 Tab("Containers", id="container-list"),
                 Tab("Images", id="image-list"),
                 Tab("Networks", id="network-list"),
+                Tab("Volumes", id="volume-list"),
                 Tab("Logs", id="container-logs"),
                 id="nav",
             )
@@ -47,6 +49,7 @@ class AppGUI(App):
             yield VerticalScroll(id="container-logs")
             yield ImagesList(self.docker, id="image-list")
             yield NetworkList(self.docker, id="network-list")
+            yield VolumesList(self.docker, id="volume-list")
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
         self.query_one(ContentSwitcher).current = event.tab.id

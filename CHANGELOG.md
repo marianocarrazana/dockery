@@ -5,6 +5,7 @@
 - Added images list
 - Added networks list
 - Added networks command
+- Added volumes list
 
 ## :lady_beetle: Fixes
 

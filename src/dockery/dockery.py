@@ -2,6 +2,7 @@ import docker
 from docker.models.containers import Container
 from docker.models.volumes import Volume
 from docker.models.images import Image
+from docker.models.networks import Network
 import click
 from rich import print
 
@@ -98,12 +99,20 @@ def images(**kargs):
     for i in imgs:
         print(i.attrs)
 
+@click.command
+@add_options(default_options)
+def networks(**kargs):
+    client = get_client(**kargs)
+    netw: list[Network] = client.networks.list()  # type: ignore
+    for i in netw:
+        print(i.attrs)
 
 main.add_command(df)
 main.add_command(volumes)
 main.add_command(ps)
 main.add_command(stats)
 main.add_command(images)
+main.add_command(networks)
 
 if __name__ == "__main__":
     main()

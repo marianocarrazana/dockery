@@ -1,4 +1,4 @@
-ContainerWidget, ImageWidget {
+ContainerWidget, ImageWidget, NetworkWidget {
     layout: horizontal;
     background: $boost;
     height: 3;

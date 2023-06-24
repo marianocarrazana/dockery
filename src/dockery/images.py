@@ -2,13 +2,11 @@ import threading
 from textual.app import ComposeResult
 from textual.widgets import Static, Label
 from textual.reactive import reactive
-from textual.containers import VerticalScroll, Grid, Vertical, Horizontal
-from textual.events import Resize
-from rich.text import TextType
-from docker import DockerClient, errors
+from textual.containers import Vertical
+from docker import DockerClient
 from docker.models.images import Image
 
-from .custom_widgets import ResponsiveGrid, ReactiveString, CustomButton
+from .custom_widgets import ResponsiveGrid
 
 
 class ImagesList(ResponsiveGrid):

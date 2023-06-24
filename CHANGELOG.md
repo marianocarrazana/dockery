@@ -2,11 +2,9 @@
 
 ## :zap: New Features
 
-- New colors, icons, buttons and more :heart_eyes:
-- Added tabs to the header :sunglasses:
-- Reduce size of elements in the containers list
-- Logs have new colors
-- Containers list now is responsive :sparkles:
+- Added images list
+- Added networks list
+- Added networks command
 
 ## :lady_beetle: Fixes
 

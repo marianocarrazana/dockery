@@ -38,6 +38,8 @@ Run on your console:
 dockery
 ```
 
+**Warning:** you will probably need to install and run dockery as a root user, or you can add permissions to your user to run docker following [this instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
 ## Extra commands
 
 ```shell
@@ -45,6 +47,7 @@ dockery df
 dockery ps
 dockery volumes
 dockery images
+dockery networks
 dockery stats
 ```
 

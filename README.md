@@ -2,6 +2,8 @@
 
 Graphical interface for Docker in your console
 
+[![Release](https://github.com/marianocarrazana/dockery/actions/workflows/release.yml/badge.svg)](https://github.com/marianocarrazana/dockery/actions/workflows/release.yml)
+
 <table>
   <tr>
     <td><img src="https://github.com/marianocarrazana/dockery/assets/17238076/bcff22c9-898c-4877-adac-ddf2e58007c4"/></td>

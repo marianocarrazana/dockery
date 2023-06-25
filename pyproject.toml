@@ -1,7 +1,7 @@
 
 [project]
 name = "dockery"
-version = "0.5.0"
+version = "0.5.1"
 description = "Graphical interface for Docker in your console"
 authors = [
     {name = "Mariano Carrazana", email = "marianocarrazana@gmail.com"},
@@ -20,7 +20,7 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [project.scripts]
-dockery = "dockery.dockery:main"
+dockery = "dockery.main:main"
 
 [tool.pdm.dev-dependencies]
 dev = [

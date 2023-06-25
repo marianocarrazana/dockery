@@ -1,4 +1,4 @@
-import threading
+from textual import work
 from textual.app import ComposeResult
 from textual.widgets import Static, Label
 from textual.reactive import reactive
@@ -22,8 +22,7 @@ class VolumesList(ResponsiveGrid):
         self.set_interval(2, self.count_timer)
 
     def count_timer(self) -> None:
-        thread = threading.Thread(target=self.get_volumes)
-        thread.start()
+        self.get_volumes()
 
     async def watch_volumes_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -31,6 +30,7 @@ class VolumesList(ResponsiveGrid):
             cw = VolumeWidget(c, self.docker)  # type: ignore
             self.grid.mount(cw)
 
+    @work(exclusive=True)
     def get_volumes(self) -> None:
         self.volumes = self.docker.volumes.list()
         self.volumes_count = len(self.volumes)

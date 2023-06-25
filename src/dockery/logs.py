@@ -1,4 +1,4 @@
-import threading
+from textual import work
 import time
 from textual.app import ComposeResult
 from textual.widgets import Static, TextLog, Tabs
@@ -34,12 +34,12 @@ class LogsContainer(TextLog):
 
     def on_mount(self) -> None:
         self.running = True
-        self.thread = threading.Thread(target=self.update_log, daemon=True)
-        self.thread.start()
+        self.update_log()
 
     async def watch_last_log(self, new_log: str):
         self.write(new_log)
 
+    @work
     def update_log(self) -> None:
         # Get the last 40 logs(get all logs can be slow)
         logs: bytes = self.container.logs(tail=40)
@@ -48,7 +48,7 @@ class LogsContainer(TextLog):
         for log in self.container.logs(stream=True, since=time.time() - 1):
             if not self.running:
                 # Finish the thread after removing the widget
-                # TODO: it doesn't finish immediately, fix that
+                # TODO: it doesn't finish immediately? fix?
                 return None
             self.last_log = log.decode()
 

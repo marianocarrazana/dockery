@@ -1,4 +1,4 @@
-import threading
+from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Static, ContentSwitcher, Tabs, Tab, Label
 from textual.widgets._header import HeaderClock
@@ -68,8 +68,7 @@ class ContainersList(ResponsiveGrid):
         self.set_interval(2, self.count_timer)
 
     def count_timer(self) -> None:
-        thread = threading.Thread(target=self.get_containers)
-        thread.start()
+        self.get_containers()
 
     async def watch_container_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -77,6 +76,7 @@ class ContainersList(ResponsiveGrid):
             cw = ContainerWidget(c, self.docker)  # type: ignore
             self.grid.mount(cw)
 
+    @work(exclusive=True)
     def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)
         self.container_count = len(self.containers)
@@ -105,13 +105,12 @@ class ContainerWidget(Static):
     def on_mount(self):
         self.set_interval(1, self.data_timer)
         self.running = True
-        thread = threading.Thread(target=self.update_usage, daemon=True)
-        thread.start()
+        self.update_usage()
 
     def data_timer(self) -> None:
-        thread = threading.Thread(target=self.update_data, daemon=True)
-        thread.start()
+        self.update_data()
 
+    @work(exclusive=True)
     def update_data(self) -> None:
         try:
             self.container.reload()
@@ -123,6 +122,7 @@ class ContainerWidget(Static):
                 "[green]" if status == "Running" else "[bright_black]"
             ) + status
 
+    @work
     def update_usage(self) -> None:
         c = self.container
         cpu = self.query_one("#cpu", ReactiveString)

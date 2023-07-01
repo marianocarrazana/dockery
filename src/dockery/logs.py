@@ -43,14 +43,14 @@ class LogsContainer(TextLog):
     def update_log(self) -> None:
         # Get the last 40 logs(get all logs can be slow)
         logs: bytes = self.container.logs(tail=40)
-        self.last_log = logs.decode()
+        self.last_log = logs.decode("utf-8", errors="ignore")
         # Start streaming logs(since last second)
         for log in self.container.logs(stream=True, since=time.time() - 1):
             if not self.running:
                 # Finish the thread after removing the widget
                 # TODO: it doesn't finish immediately? fix?
                 return None
-            self.last_log = log.decode()
+            self.last_log = log.decode("utf-8", errors="ignore")
 
     def on_unmount(self):
         self.running = False

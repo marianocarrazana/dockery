@@ -295,7 +295,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 lock_version = "4.2"
 cross_platform = true
 groups = ["default", "dev"]
-content_hash = "sha256:6b72abe8631e9e839a58666f8e3866381bc8df8d8bbac658fa7406a59fee96a5"
+content_hash = "sha256:9406b9158747bdbe62bc090c84b6affcd8ac5da5e1eb0f49ec744a513bca6a32"
 
 [metadata.files]
 "bandit 1.7.5" = [

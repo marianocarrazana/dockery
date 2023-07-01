@@ -42,7 +42,7 @@ dockery
 
 **Warning:** you will probably need to install and run dockery as a root user, or you can add permissions to your user to run docker following [this instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
 
-## Extra commands
+## Utils
 
 ```shell
 dockery df
@@ -53,4 +53,23 @@ dockery networks
 dockery stats
 ```
 
-## **Enjoy it!**
+You specify the format output of these commands with the parameter `--format`, e.g:
+
+```shell
+dockery df --format json
+dockery df --format yaml
+```
+
+### Get logs
+
+```shel
+dockery logs {container_name}
+```
+
+You can use the parameter `--stream` to get the logs in real time, e.g:
+
+```shel
+dockery logs {container_name} --stream
+```
+
+### **Enjoy it!**

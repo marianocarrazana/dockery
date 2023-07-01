@@ -2,11 +2,8 @@
 
 ## :zap: New Features
 
-- Added images list
-- Added networks list
-- Added networks command
-- Added volumes list
+- Nothing new :disappointed:
 
 ## :lady_beetle: Fixes
 
-- Maybe theres a lot of new bugs :sweat_smile:
+- Fix error when images has not tags

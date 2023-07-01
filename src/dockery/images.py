@@ -42,11 +42,17 @@ class ImageWidget(Static):
         self.client = client
         self.attrs = image.attrs or {}
         self.isize = self.attrs.get("Size", 0) / 1000 / 1000
+        if self.image.tags:
+            self.tag = self.image.tags[0]
+        elif self.image.id:
+            self.tag = self.image.id.replace("sha256:", "")
+        else:
+            self.tag = ""
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Label("[b]" + (self.image.tags[0] or "")),
+            Label("[b]" + self.tag),
             Label(self.image.short_id.replace("sha256:", "")),
             Label(f"Size: {self.isize:.2f}MB"),
         )

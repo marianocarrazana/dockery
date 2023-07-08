@@ -22,7 +22,7 @@ class CustomButton(Static):
 
     def watch_color(self, new_color: str):
         if new_color != "":
-            self.styles.outline = (self.variant, new_color)
+            self.styles.outline = (self.variant, new_color) # type: ignore
 
     def on_mount(self) -> None:
         self.text = self.start_text

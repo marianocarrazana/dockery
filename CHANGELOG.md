@@ -4,7 +4,8 @@
 
 - Add a `%` to stats
 - MEM stats display the memory usage in megabytes
+- Optimized response speed in container logs
 
 ## :lady_beetle: Fixes
 
-- No bug fixes for now
+- Fixed when add/remove a new container causes dockery to stop working

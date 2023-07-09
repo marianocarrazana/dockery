@@ -13,13 +13,14 @@ from textual.containers import (
 from .utils import get_cpu_usage, get_mem_usage
 from .logs import LogsButton
 from .custom_widgets import CustomButton, ResponsiveGrid, ReactiveString
+from .models import store
 
 
 class ContainersList(ResponsiveGrid):
     container_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
-        self.containers = []
+        self.containers: list[Container] = []
         self.docker = docker
         super().__init__(**kargs)
 
@@ -32,13 +33,16 @@ class ContainersList(ResponsiveGrid):
 
     async def watch_container_count(self, count: int) -> None:
         await self.grid.remove_children()
+        images_in_use = []
         for c in self.containers:
-            cw = ContainerWidget(c, self.docker)  # type: ignore
+            cw = ContainerWidget(c, self.docker, classes="li")
             self.grid.mount(cw)
+            images_in_use.append(c.image.id)  # type: ignore
+        store.containers_images = images_in_use
 
     @work(exclusive=True)
     def get_containers(self) -> None:
-        self.containers = self.docker.containers.list(all=True)
+        self.containers = self.docker.containers.list(all=True)  # type: ignore
         self.container_count = len(self.containers)
 
 
@@ -47,14 +51,17 @@ class ContainerWidget(Static):
         self.container = container
         self.client = client
         self.container_id = container.id
+        self.running = False
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
         yield Group(
             Label("[b]" + (self.container.name or ""), classes="container-name"),
             Vertical(
-                ReactiveString(id="status"),
-                Horizontal(ReactiveString(id="cpu"), ReactiveString(id="mem")),
+                ReactiveString(classes="status"),
+                Horizontal(
+                    ReactiveString(classes="cpu"), ReactiveString(classes="mem")
+                ),
                 classes="stats-text",
             ),
             classes="container-info",
@@ -63,11 +70,11 @@ class ContainerWidget(Static):
         yield Group(StatusButtons(self.container))
 
     def on_mount(self):
-        self.status_widget = self.query_one("#status", ReactiveString)
-        self.cpu_widget = self.query_one("#cpu", ReactiveString)
-        self.mem_widget = self.query_one("#mem", ReactiveString)
+        self.status_widget = self.query_one(".status", ReactiveString)
+        self.cpu_widget = self.query_one(".cpu", ReactiveString)
+        self.mem_widget = self.query_one(".mem", ReactiveString)
         self.set_interval(1, self.data_timer)
-        self.running = True
+        self.mounted = True
         self.update_usage()
 
     def data_timer(self) -> None:
@@ -81,21 +88,29 @@ class ContainerWidget(Static):
             return None
         else:
             status = self.container.status.capitalize()
+            self.running = status == "Running"
             self.status_widget.text = (
-                "[green]" if status == "Running" else "[bright_black]"
+                "[green]" if self.running else "[bright_black]"
             ) + status
+            self.classes = "li running" if self.running else "li"
 
     @work
     def update_usage(self) -> None:
         for stat in self.container.stats(stream=True, decode=True):
-            if not self.running:  # finish the thread
+            if not self.mounted:  # finish the thread
                 return None
-            mem_mb, mem_percent = get_mem_usage(stat)
-            self.cpu_widget.text = f"CPU: {get_cpu_usage(stat):.1f}%"
-            self.mem_widget.text = f"MEM: {mem_mb:.1f}MB({mem_percent:.1f}%)"
+            if self.running:
+                mem_mb, mem_percent = get_mem_usage(stat)
+                cpu_text = f"CPU: {get_cpu_usage(stat):.1f}%"
+                mem_text = f"MEM: {mem_mb:.1f}MB({mem_percent:.1f}%)"
+            else:
+                cpu_text = "CPU: -"
+                mem_text = "MEM: -"
+            self.cpu_widget.text = cpu_text
+            self.mem_widget.text = mem_text
 
     def on_unmount(self):
-        self.running = False
+        self.mounted = False
 
 
 class StatusButtons(Static):

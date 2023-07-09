@@ -42,7 +42,6 @@ class ResponsiveGrid(VerticalScroll):
     def on_mount(self) -> None:
         self.resize()
         self.grid.styles.grid_columns = "1fr"
-        self.grid.styles.grid_rows = "4"
         self.grid.styles.width = "100%"
         self.grid.styles.height = "auto"
 

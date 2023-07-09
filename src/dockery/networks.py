@@ -27,7 +27,7 @@ class NetworkList(ResponsiveGrid):
     async def watch_networks_count(self, count: int) -> None:
         await self.grid.remove_children()
         for c in self.networks:
-            cw = NetworkWidget(c, self.docker)  # type: ignore
+            cw = NetworkWidget(c, self.docker, classes="li")  # type: ignore
             self.grid.mount(cw)
 
     @work(exclusive=True)

@@ -1,13 +1,19 @@
-ContainerWidget,
-ImageWidget,
-NetworkWidget,
-VolumeWidget {
+.li {
     layout: horizontal;
-    background: $boost;
-    height: 3;
-    margin: 1;
+    height: 5;
+    margin: 0 2;
     min-width: 50;
-    padding: 0 2;
+    padding: 0 1;
+    border: round gray;
+}
+
+.li.running {
+    border: round greenyellow;
+}
+
+ResponsiveGrid Grid {
+    grid-rows: 5;
+    grid-gutter: 0;
 }
 
 Footer {
@@ -38,7 +44,12 @@ Footer .footer--description {
     width: 1fr;
 }
 
-.stats-text > Horizontal > ReactiveString {
+.stats-text > Horizontal > ReactiveString.cpu {
+    width: 12;
+    height: 1;
+}
+
+.stats-text > Horizontal > ReactiveString.mem {
     width: 20;
     height: 1;
 }
@@ -66,7 +77,7 @@ StartStopButton {
 }
 
 TabPane {
-    height: 100;
+    height: 100%;
 }
 
 #header {

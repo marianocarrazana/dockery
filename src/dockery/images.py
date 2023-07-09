@@ -7,6 +7,7 @@ from docker import DockerClient
 from docker.models.images import Image
 
 from .custom_widgets import ResponsiveGrid
+from .models import store
 
 
 class ImagesList(ResponsiveGrid):
@@ -27,7 +28,7 @@ class ImagesList(ResponsiveGrid):
     async def watch_images_count(self, count: int) -> None:
         await self.grid.remove_children()
         for c in self.images:
-            cw = ImageWidget(c, self.docker)  # type: ignore
+            cw = ImageWidget(c, self.docker, classes="li")  # type: ignore
             self.grid.mount(cw)
 
     @work(exclusive=True)
@@ -56,4 +57,18 @@ class ImageWidget(Static):
             Label("[b]" + self.tag),
             Label(self.short_id),
             Label(f"Size: {self.isize:.2f}MB"),
+        )
+
+    def on_mount(self):
+        self.set_interval(2, self.count_timer)
+
+    def count_timer(self):
+        self.update_usage()
+
+    @work(exclusive=True)
+    def update_usage(self):
+        print(self.image.id)
+        print(store.containers_images)
+        self.classes = (
+            "li running" if self.image.id in store.containers_images else "li"
         )

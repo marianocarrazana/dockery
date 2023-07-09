@@ -27,7 +27,7 @@ class VolumesList(ResponsiveGrid):
     async def watch_volumes_count(self, count: int) -> None:
         await self.grid.remove_children()
         for c in self.volumes:
-            cw = VolumeWidget(c, self.docker)  # type: ignore
+            cw = VolumeWidget(c, self.docker, classes="li")  # type: ignore
             self.grid.mount(cw)
 
     @work(exclusive=True)

@@ -63,6 +63,9 @@ class ContainerWidget(Static):
         yield Group(StatusButtons(self.container))
 
     def on_mount(self):
+        self.status_widget = self.query_one("#status", ReactiveString)
+        self.cpu_widget = self.query_one("#cpu", ReactiveString)
+        self.mem_widget = self.query_one("#mem", ReactiveString)
         self.set_interval(1, self.data_timer)
         self.running = True
         self.update_usage()
@@ -78,21 +81,18 @@ class ContainerWidget(Static):
             return None
         else:
             status = self.container.status.capitalize()
-            self.query_one("#status", ReactiveString).text = (
+            self.status_widget.text = (
                 "[green]" if status == "Running" else "[bright_black]"
             ) + status
 
     @work
     def update_usage(self) -> None:
-        c = self.container
-        cpu = self.query_one("#cpu", ReactiveString)
-        mem = self.query_one("#mem", ReactiveString)
-        for stat in c.stats(stream=True, decode=True):
+        for stat in self.container.stats(stream=True, decode=True):
             if not self.running:  # finish the thread
                 return None
             mem_mb, mem_percent = get_mem_usage(stat)
-            cpu.text = f"CPU: {get_cpu_usage(stat):.1f}%"
-            mem.text = f"MEM: {mem_mb:.1f}MB({mem_percent:.1f}%)"
+            self.cpu_widget.text = f"CPU: {get_cpu_usage(stat):.1f}%"
+            self.mem_widget.text = f"MEM: {mem_mb:.1f}MB({mem_percent:.1f}%)"
 
     def on_unmount(self):
         self.running = False
@@ -127,14 +127,14 @@ class StartStopButton(Static):
             self.container.stop()
 
     def on_mount(self) -> None:
+        self.button = self.query_one(CustomButton)
         self.running = self.container.status == "running"
 
     def watch_running(self, running: bool):
         self.variant = "error" if running else "success"
         text = ":black_square_button:Stop" if running else ":arrow_forward: Start"
-        btn = self.query_one(CustomButton)
-        btn.text = text
-        btn.color = "red" if running else "green"
+        self.button.text = text
+        self.button.color = "red" if running else "green"
 
     def compose(self) -> ComposeResult:
         yield CustomButton("Start")

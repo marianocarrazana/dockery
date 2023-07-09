@@ -14,12 +14,17 @@ class LogsButton(Static):
         self.container = container
         super().__init__(**kargs)
 
+    def on_mount(self) -> None:
+        self.logs_container = self.app.query_one(
+            "VerticalScroll#container-logs", VerticalScroll
+        )
+        self.tabs = self.app.query_one("#nav", Tabs)
+
     async def on_click(self) -> None:
-        cl = self.app.query_one("VerticalScroll#container-logs", VerticalScroll)
-        await cl.remove_children()
+        await self.logs_container.remove_children()
         lc = LogsContainer(self.container)
-        await cl.mount(lc)
-        self.app.query_one("#nav", Tabs).active = "container-logs"
+        await self.logs_container.mount(lc)
+        self.tabs.active = "container-logs"
 
     def compose(self) -> ComposeResult:
         yield CustomButton(":notebook:Logs", color="blue")

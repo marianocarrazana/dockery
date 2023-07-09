@@ -2,13 +2,9 @@
 
 ## :zap: New Features
 
-- New `logs` command, use it like this:
-
-    `dockery logs {container}`, add the parameter
-    `--stream` to get the logs in real time.
-
-- New `--format` parameter to specify the output format of almost all commands output, for now it supports `json` and `yaml` only.
+- Add a `%` to stats
+- MEM stats display the memory usage in megabytes
 
 ## :lady_beetle: Fixes
 
-- Avoid exceptions on logs decode
+- No bug fixes for now

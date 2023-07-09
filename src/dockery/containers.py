@@ -90,8 +90,9 @@ class ContainerWidget(Static):
         for stat in c.stats(stream=True, decode=True):
             if not self.running:  # finish the thread
                 return None
-            cpu.text = f"CPU: {get_cpu_usage(stat):.1f}"
-            mem.text = f"MEM: {get_mem_usage(stat):.1f}"
+            mem_mb, mem_percent = get_mem_usage(stat)
+            cpu.text = f"CPU: {get_cpu_usage(stat):.1f}%"
+            mem.text = f"MEM: {mem_mb:.1f}MB({mem_percent:.1f}%)"
 
     def on_unmount(self):
         self.running = False

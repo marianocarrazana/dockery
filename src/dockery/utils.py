@@ -25,10 +25,10 @@ def get_cpu_usage(stats: dict) -> float:
     return percentage
 
 
-def get_mem_usage(stats: dict) -> float:
+def get_mem_usage(stats: dict) -> tuple:
     mem_stats = stats["memory_stats"]
     if len(mem_stats) == 0:
-        return 0.0
+        return (0, 0.0)
     mem_used = (
         mem_stats["usage"]
         - mem_stats["stats"].get("cache", 0)
@@ -36,7 +36,7 @@ def get_mem_usage(stats: dict) -> float:
     )
     limit = stats["memory_stats"]["limit"]
     percentage = mem_used / limit * 100
-    return percentage
+    return (mem_used/1000000, percentage)
 
 
 def var_dump(obj: Any, syntax: Literal["json", "yaml"] = "yaml"):

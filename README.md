@@ -51,6 +51,9 @@ dockery volumes
 dockery images
 dockery networks
 dockery stats
+# Docker swarm
+dockery configs
+dockery secrets
 ```
 
 You specify the format output of these commands with the parameter `--format`, e.g:

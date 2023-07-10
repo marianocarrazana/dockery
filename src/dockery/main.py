@@ -4,6 +4,8 @@ from docker.models.containers import Container
 from docker.models.volumes import Volume
 from docker.models.images import Image
 from docker.models.networks import Network
+from docker.models.configs import Config
+from docker.models.secrets import Secret
 import click
 from rich import print
 
@@ -129,6 +131,24 @@ def logs(**kargs):
             print(logs.decode("utf-8", errors="ignore"))
 
 
+@click.command
+@add_options(default_options)
+def configs(**kargs):
+    client = get_client(**kargs)
+    conf: list[Config] = client.configs.list()  # type: ignore
+    conf_list = list(map(lambda x: x.attrs, conf))
+    var_dump(conf_list, kargs["format"])
+
+
+@click.command
+@add_options(default_options)
+def secrets(**kargs):
+    client = get_client(**kargs)
+    secr: list[Secret] = client.secrets.list()  # type: ignore
+    secr_list = list(map(lambda x: x.attrs, secr))
+    var_dump(secr_list, kargs["format"])
+
+
 main.add_command(df)
 main.add_command(volumes)
 main.add_command(ps)
@@ -136,6 +156,8 @@ main.add_command(stats)
 main.add_command(images)
 main.add_command(networks)
 main.add_command(logs)
+main.add_command(configs)
+main.add_command(secrets)
 
 if __name__ == "__main__":
     main()

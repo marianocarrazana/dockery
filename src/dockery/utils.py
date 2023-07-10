@@ -50,7 +50,7 @@ def var_dump(obj: Any, syntax: Literal["json", "yaml"] = "yaml"):
 
 
 def daemon(func):
-    def wrapper_func(*args, **kwarg):
-        Thread(target=func, args=args, kwargs=kwarg, daemon=True).start()
+    def wrapper_func(*args, **kwargs):
+        Thread(target=func, args=args, kwargs=kwargs, daemon=True).start()
 
     return wrapper_func

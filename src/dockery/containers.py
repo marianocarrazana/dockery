@@ -1,4 +1,3 @@
-from textual import work
 from textual.app import ComposeResult
 from textual.widgets import Static, Label
 from textual.reactive import reactive
@@ -10,7 +9,7 @@ from textual.containers import (
     Container as Group,
 )
 
-from .utils import get_cpu_usage, get_mem_usage
+from .utils import get_cpu_usage, get_mem_usage, daemon
 from .logs import LogsButton
 from .custom_widgets import CustomButton, ResponsiveGrid, ReactiveString
 from .models import store
@@ -26,10 +25,7 @@ class ContainersList(ResponsiveGrid):
 
     def on_mount(self) -> None:
         self.get_containers()
-        self.set_interval(2, self.count_timer)
-
-    def count_timer(self) -> None:
-        self.get_containers()
+        self.set_interval(2, self.get_containers)
 
     async def watch_container_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -40,7 +36,7 @@ class ContainersList(ResponsiveGrid):
             images_in_use.append(c.image.id)  # type: ignore
         store.containers_images = images_in_use
 
-    @work(exclusive=True)
+    @daemon
     def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)  # type: ignore
         self.container_count = len(self.containers)
@@ -73,14 +69,11 @@ class ContainerWidget(Static):
         self.status_widget = self.query_one(".status", ReactiveString)
         self.cpu_widget = self.query_one(".cpu", ReactiveString)
         self.mem_widget = self.query_one(".mem", ReactiveString)
-        self.set_interval(1, self.data_timer)
+        self.set_interval(1, self.update_data)
         self.mounted = True
         self.update_usage()
 
-    def data_timer(self) -> None:
-        self.update_data()
-
-    @work(exclusive=True)
+    @daemon
     def update_data(self) -> None:
         try:
             self.container.reload()
@@ -94,7 +87,7 @@ class ContainerWidget(Static):
             ) + status
             self.classes = "li running" if self.running else "li"
 
-    @work
+    @daemon
     def update_usage(self) -> None:
         for stat in self.container.stats(stream=True, decode=True):
             if not self.mounted:  # finish the thread

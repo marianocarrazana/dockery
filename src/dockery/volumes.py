@@ -1,4 +1,3 @@
-from textual import work
 from textual.app import ComposeResult
 from textual.widgets import Static, Label
 from textual.reactive import reactive
@@ -7,32 +6,30 @@ from docker import DockerClient
 from docker.models.volumes import Volume
 
 from .custom_widgets import ResponsiveGrid
+from .utils import daemon
 
 
 class VolumesList(ResponsiveGrid):
     volumes_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
-        self.volumes = []
+        self.volumes: list[Volume] = []
         self.docker = docker
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
         self.get_volumes()
-        self.set_interval(2, self.count_timer)
-
-    def count_timer(self) -> None:
-        self.get_volumes()
+        self.set_interval(2, self.get_volumes)
 
     async def watch_volumes_count(self, count: int) -> None:
         await self.grid.remove_children()
         for c in self.volumes:
-            cw = VolumeWidget(c, self.docker, classes="li")  # type: ignore
+            cw = VolumeWidget(c, self.docker, classes="li")
             self.grid.mount(cw)
 
-    @work(exclusive=True)
+    @daemon
     def get_volumes(self) -> None:
-        self.volumes = self.docker.volumes.list()
+        self.volumes = self.docker.volumes.list()  # type: ignore
         self.volumes_count = len(self.volumes)
 
 

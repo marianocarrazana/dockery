@@ -1,4 +1,3 @@
-from textual import work
 import time
 from textual.app import ComposeResult
 from textual.widgets import Static, TextLog, Tabs
@@ -7,6 +6,7 @@ from textual.containers import VerticalScroll
 from docker.models.containers import Container
 
 from .custom_widgets import CustomButton
+from .utils import daemon
 
 
 class LogsButton(Static):
@@ -44,7 +44,7 @@ class LogsContainer(TextLog):
     async def watch_last_log(self, new_log: str):
         self.write(new_log)
 
-    @work
+    @daemon
     def update_log(self) -> None:
         # Get the last 40 logs(get all logs can be slow)
         logs: bytes = self.container.logs(tail=40)

@@ -1,4 +1,3 @@
-from textual import work
 from textual.app import ComposeResult
 from textual.widgets import Static, Label
 from textual.reactive import reactive
@@ -8,32 +7,30 @@ from docker.models.images import Image
 
 from .custom_widgets import ResponsiveGrid
 from .models import store
+from .utils import daemon
 
 
 class ImagesList(ResponsiveGrid):
     images_count = reactive(0)
 
     def __init__(self, docker: DockerClient, **kargs):
-        self.images = []
+        self.images: list[Image] = []
         self.docker = docker
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
         self.get_images()
-        self.set_interval(2, self.count_timer)
-
-    def count_timer(self) -> None:
-        self.get_images()
+        self.set_interval(2, self.get_images)
 
     async def watch_images_count(self, count: int) -> None:
         await self.grid.remove_children()
         for c in self.images:
-            cw = ImageWidget(c, self.docker, classes="li")  # type: ignore
+            cw = ImageWidget(c, self.docker, classes="li")
             self.grid.mount(cw)
 
-    @work(exclusive=True)
+    @daemon
     def get_images(self) -> None:
-        self.images = self.docker.images.list(all=False)
+        self.images = self.docker.images.list(all=False)  # type: ignore
         self.images_count = len(self.images)
 
 
@@ -60,12 +57,9 @@ class ImageWidget(Static):
         )
 
     def on_mount(self):
-        self.set_interval(2, self.count_timer)
+        self.set_interval(2, self.update_usage)
 
-    def count_timer(self):
-        self.update_usage()
-
-    @work(exclusive=True)
+    @daemon
     def update_usage(self):
         print(self.image.id)
         print(store.containers_images)

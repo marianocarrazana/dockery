@@ -19,7 +19,7 @@ Graphical interface for Docker in your console
 ### From source
 
 ```shell
-git clone git@github.com:marianocarrazana/dockery.git
+git clone https://github.com/marianocarrazana/dockery.git
 cd dockery
 pip install -e .
 # update only:

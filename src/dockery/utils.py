@@ -1,4 +1,5 @@
 import json
+from threading import Thread
 from typing import Any, Literal
 from rich.console import Console
 from rich.syntax import Syntax
@@ -36,7 +37,7 @@ def get_mem_usage(stats: dict) -> tuple:
     )
     limit = stats["memory_stats"]["limit"]
     percentage = mem_used / limit * 100
-    return (mem_used/1000000, percentage)
+    return (mem_used / 1000000, percentage)
 
 
 def var_dump(obj: Any, syntax: Literal["json", "yaml"] = "yaml"):
@@ -46,3 +47,10 @@ def var_dump(obj: Any, syntax: Literal["json", "yaml"] = "yaml"):
         text_obj = json.dumps(obj, default=str, indent=2)
     out = Syntax(text_obj, syntax, theme="ansi_dark")
     console.print(out)
+
+
+def daemon(func):
+    def wrapper_func(*args, **kwarg):
+        Thread(target=func, args=args, kwargs=kwarg, daemon=True).start()
+
+    return wrapper_func

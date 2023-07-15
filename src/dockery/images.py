@@ -61,8 +61,6 @@ class ImageWidget(Static):
 
     @daemon
     def update_usage(self):
-        print(self.image.id)
-        print(store.containers_images)
         self.classes = (
             "li running" if self.image.id in store.containers_images else "li"
         )

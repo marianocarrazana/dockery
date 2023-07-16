@@ -4,17 +4,15 @@ Graphical interface for Docker in your console
 
 [![Release](https://github.com/marianocarrazana/dockery/actions/workflows/release.yml/badge.svg)](https://github.com/marianocarrazana/dockery/actions/workflows/release.yml)
 
-<table>
-  <tr>
-    <td><img src="https://github.com/marianocarrazana/dockery/assets/17238076/bcff22c9-898c-4877-adac-ddf2e58007c4"/></td>
-    <td><img src="https://github.com/marianocarrazana/dockery/assets/17238076/0da0c13c-d84d-4e8a-8b6f-a0d779c2d98d"/></td>
-  </tr>
-  <tr>
-    <td colspan="2"><img src="https://github.com/marianocarrazana/dockery/assets/17238076/c991ff4b-eebf-4495-b67c-2c57e933bd7d" /></td>
-  </tr>
-</table>
+![screenshot1](https://github.com/marianocarrazana/dockery/assets/17238076/2c7ead87-ede2-4834-87e6-8556740c30bd)
 
 ## Installation
+
+### From pip
+
+```shell
+pip install -U dockery
+```
 
 ### From source
 
@@ -24,12 +22,6 @@ cd dockery
 pip install -e .
 # update only:
 git pull
-```
-
-### From pip
-
-```shell
-pip install -U dockery
 ```
 
 ## Usage
@@ -65,7 +57,11 @@ dockery df --format yaml
 
 ### Get logs
 
-```shel
+You can use `ΞLogs` button on the containers tabs to see the logs.
+
+Or you can use the logs command to visualize them:
+
+```shell
 dockery logs {container_name}
 ```
 

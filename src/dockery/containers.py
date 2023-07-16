@@ -24,8 +24,8 @@ class ContainersList(ResponsiveGrid):
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_containers(True)
-        self.set_interval(2, self.get_containers)
+        self.get_containers()
+        self.get_containers_timer = self.set_interval(2, self.get_containers)
 
     async def watch_container_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -37,11 +37,15 @@ class ContainersList(ResponsiveGrid):
         store.containers_images = images_in_use
 
     @daemon
-    def get_containers(self, force_update: bool = False) -> None:
-        if not self.is_visible and not force_update:
-            return
+    def get_containers(self) -> None:
         self.containers = self.docker.containers.list(all=True)  # type: ignore
         self.container_count = len(self.containers)
+
+    def on_hide(self):
+        self.get_containers_timer.pause()
+
+    def on_show(self):
+        self.get_containers_timer.resume()
 
 
 class ContainerWidget(Static):
@@ -75,11 +79,10 @@ class ContainerWidget(Static):
         self.set_interval(1, self.update_data)
         self.mounted = True
         self.update_usage()
+        self.update_data_timer = self.set_interval(1, self.update_data, pause=True)
 
     @daemon
     def update_data(self) -> None:
-        if not self.is_visible:
-            return
         try:
             self.container.reload()
         except errors.NotFound:
@@ -113,9 +116,11 @@ class ContainerWidget(Static):
         self.mounted = False
 
     def on_hide(self):
+        self.update_data_timer.pause()
         self.is_visible = False
 
     def on_show(self):
+        self.update_data_timer.resume()
         self.is_visible = True
 
 

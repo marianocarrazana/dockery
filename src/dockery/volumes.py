@@ -15,11 +15,12 @@ class VolumesList(ResponsiveGrid):
     def __init__(self, docker: DockerClient, **kargs):
         self.volumes: list[Volume] = []
         self.docker = docker
+        
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_volumes(True)
-        self.set_interval(2, self.get_volumes)
+        self.get_volumes()
+        self.get_volumes_timer = self.set_interval(2, self.get_volumes, pause=True)
 
     async def watch_volumes_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -28,11 +29,15 @@ class VolumesList(ResponsiveGrid):
             self.grid.mount(cw)
 
     @daemon
-    def get_volumes(self, force_update: bool = False) -> None:
-        if not self.is_visible and not force_update:
-            return
+    def get_volumes(self) -> None:
         self.volumes = self.docker.volumes.list()  # type: ignore
         self.volumes_count = len(self.volumes)
+
+    def on_hide(self):
+        self.get_volumes_timer.pause()
+
+    def on_show(self):
+        self.get_volumes_timer.resume()
 
 
 class VolumeWidget(Static):

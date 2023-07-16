@@ -19,8 +19,8 @@ class ImagesList(ResponsiveGrid):
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_images(True)
-        self.set_interval(2, self.get_images)
+        self.get_images()
+        self.get_images_timer = self.set_interval(2, self.get_images, pause=True)
 
     async def watch_images_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -29,11 +29,15 @@ class ImagesList(ResponsiveGrid):
             self.grid.mount(cw)
 
     @daemon
-    def get_images(self, force_update: bool = False) -> None:
-        if not self.is_visible and not force_update:
-            return
+    def get_images(self) -> None:
         self.images = self.docker.images.list(all=False)  # type: ignore
         self.images_count = len(self.images)
+
+    def on_hide(self):
+        self.get_images_timer.pause()
+
+    def on_show(self):
+        self.get_images_timer.resume()
 
 
 class ImageWidget(Static):

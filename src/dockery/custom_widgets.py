@@ -54,12 +54,6 @@ class ResponsiveGrid(VerticalScroll):
         columns = math.floor(self.size.width / min_container_width)
         self.grid.styles.grid_size_columns = columns
 
-    def on_hide(self):
-        self.is_visible = False
-
-    def on_show(self):
-        self.is_visible = True
-
 
 class ReactiveString(Static):
     text = reactive("")

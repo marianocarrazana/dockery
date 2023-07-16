@@ -2,13 +2,11 @@
 
 ## :zap: New Features
 
-- New design :heart_eyes:
-- Containers running are highlighted in green
-- Images in use are highlighted in green
-- Added `configs` and `secrets` commands
+- Improve performance
+- New icons
+- Stats texts now takes all available space
 
 ## :lady_beetle: Fixes
 
-- Mem stats overflow when the console is too small
-- Fixed single CPU servers doesnt show stats correctly
-- Fixed dockery continue working in background when you press (q)quit
+- Mem stats disappear
+- Fix some graphics glitch in some terminals

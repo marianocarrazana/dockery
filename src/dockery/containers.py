@@ -3,11 +3,7 @@ from textual.widgets import Static, Label
 from textual.reactive import reactive
 from docker import DockerClient, errors
 from docker.models.containers import Container
-from textual.containers import (
-    Horizontal,
-    Vertical,
-    Container as Group,
-)
+from textual.containers import Horizontal, Vertical
 
 from .utils import get_cpu_usage, get_mem_usage, daemon
 from .logs import LogsButton
@@ -55,22 +51,17 @@ class ContainerWidget(Static):
         self.container_id = container.id
         self.running = False
         self.is_visible = False
+        self.container_name = self.container.name or ""
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
-        yield Group(
-            Label("[b]" + (self.container.name or ""), classes="container-name"),
-            Vertical(
-                ReactiveString(classes="status"),
-                Horizontal(
-                    ReactiveString(classes="cpu"), ReactiveString(classes="mem")
-                ),
-                classes="stats-text",
-            ),
+        yield Vertical(
+            Label(self.container_name, classes="container-name bold"),
+            ReactiveString(classes="status"),
+            Horizontal(ReactiveString(classes="cpu"), ReactiveString(classes="mem")),
             classes="container-info",
         )
-
-        yield Group(StatusButtons(self.container))
+        yield StatusButtons(self.container)
 
     def on_mount(self):
         self.status_widget = self.query_one(".status", ReactiveString)
@@ -103,9 +94,13 @@ class ContainerWidget(Static):
             if not self.is_visible:
                 continue
             if self.running:
-                mem_mb, mem_percent = get_mem_usage(stat)
                 cpu_text = f"CPU: {get_cpu_usage(stat):.1f}%"
-                mem_text = f"MEM: {mem_mb:.1f}MB({mem_percent:.1f}%)"
+                mem, mem_percent = get_mem_usage(stat)
+                data_unit = "MB"
+                if mem >= 1000:
+                    mem = mem / 1000
+                    data_unit = "GB"
+                mem_text = f"MEM: {mem:.1f}{data_unit}({mem_percent:.1f}%)"
             else:
                 cpu_text = "CPU: -"
                 mem_text = "MEM: -"

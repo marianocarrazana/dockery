@@ -158,7 +158,7 @@ class StartStopButton(Static):
 
     def watch_running(self, running: bool):
         self.variant = "error" if running else "success"
-        text = ":black_square_button:Stop" if running else ":arrow_forward: Start"
+        text = "▣ Stop" if running else "▶ Start"
         self.button.text = text
         self.button.color = "red" if running else "green"
 
@@ -175,4 +175,4 @@ class RestartButton(Static):
         self.container.restart()
 
     def compose(self) -> ComposeResult:
-        yield CustomButton(":grey_exclamation:Restart", color="orange")
+        yield CustomButton("↻ Restart", color="orange")

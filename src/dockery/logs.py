@@ -27,7 +27,7 @@ class LogsButton(Static):
         self.tabs.active = "container-logs"
 
     def compose(self) -> ComposeResult:
-        yield CustomButton(":notebook:Logs", color="blue")
+        yield CustomButton("Ξ Logs", color="blue")
 
 
 class LogsContainer(TextLog):

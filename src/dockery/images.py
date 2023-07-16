@@ -19,7 +19,7 @@ class ImagesList(ResponsiveGrid):
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_images()
+        self.get_images(True)
         self.set_interval(2, self.get_images)
 
     async def watch_images_count(self, count: int) -> None:
@@ -29,7 +29,9 @@ class ImagesList(ResponsiveGrid):
             self.grid.mount(cw)
 
     @daemon
-    def get_images(self) -> None:
+    def get_images(self, force_update: bool = False) -> None:
+        if not self.is_visible and not force_update:
+            return
         self.images = self.docker.images.list(all=False)  # type: ignore
         self.images_count = len(self.images)
 

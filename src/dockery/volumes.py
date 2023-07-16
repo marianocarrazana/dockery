@@ -18,7 +18,7 @@ class VolumesList(ResponsiveGrid):
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_volumes()
+        self.get_volumes(True)
         self.set_interval(2, self.get_volumes)
 
     async def watch_volumes_count(self, count: int) -> None:
@@ -28,7 +28,9 @@ class VolumesList(ResponsiveGrid):
             self.grid.mount(cw)
 
     @daemon
-    def get_volumes(self) -> None:
+    def get_volumes(self, force_update: bool = False) -> None:
+        if not self.is_visible and not force_update:
+            return
         self.volumes = self.docker.volumes.list()  # type: ignore
         self.volumes_count = len(self.volumes)
 

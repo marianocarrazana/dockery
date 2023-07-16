@@ -18,11 +18,8 @@ class NetworkList(ResponsiveGrid):
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_networks()
-        self.set_interval(2, self.count_timer)
-
-    def count_timer(self) -> None:
-        self.get_networks()
+        self.get_networks(True)
+        self.set_interval(2, self.get_networks)
 
     async def watch_networks_count(self, count: int) -> None:
         await self.grid.remove_children()
@@ -31,7 +28,9 @@ class NetworkList(ResponsiveGrid):
             self.grid.mount(cw)
 
     @daemon
-    def get_networks(self) -> None:
+    def get_networks(self, force_update: bool = False) -> None:
+        if not self.is_visible and not force_update:
+            return
         self.networks = self.docker.networks.list()
         self.networks_count = len(self.networks)
 

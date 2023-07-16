@@ -22,7 +22,7 @@ class CustomButton(Static):
 
     def watch_color(self, new_color: str):
         if new_color != "":
-            self.styles.outline = (self.variant, new_color) # type: ignore
+            self.styles.outline = (self.variant, new_color)  # type: ignore
 
     def on_mount(self) -> None:
         self.text = self.start_text
@@ -34,6 +34,7 @@ class ResponsiveGrid(VerticalScroll):
 
     def __init__(self, **kargs):
         self.grid = Grid()
+        self.is_visible = False
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
@@ -52,6 +53,12 @@ class ResponsiveGrid(VerticalScroll):
         min_container_width = 75
         columns = math.floor(self.size.width / min_container_width)
         self.grid.styles.grid_size_columns = columns
+
+    def on_hide(self):
+        self.is_visible = False
+
+    def on_show(self):
+        self.is_visible = True
 
 
 class ReactiveString(Static):

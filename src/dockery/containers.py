@@ -24,7 +24,7 @@ class ContainersList(ResponsiveGrid):
         super().__init__(**kargs)
 
     def on_mount(self) -> None:
-        self.get_containers()
+        self.get_containers(True)
         self.set_interval(2, self.get_containers)
 
     async def watch_container_count(self, count: int) -> None:
@@ -37,7 +37,9 @@ class ContainersList(ResponsiveGrid):
         store.containers_images = images_in_use
 
     @daemon
-    def get_containers(self) -> None:
+    def get_containers(self, force_update: bool = False) -> None:
+        if not self.is_visible and not force_update:
+            return
         self.containers = self.docker.containers.list(all=True)  # type: ignore
         self.container_count = len(self.containers)
 
@@ -48,6 +50,7 @@ class ContainerWidget(Static):
         self.client = client
         self.container_id = container.id
         self.running = False
+        self.is_visible = False
         super().__init__(**kargs)
 
     def compose(self) -> ComposeResult:
@@ -75,6 +78,8 @@ class ContainerWidget(Static):
 
     @daemon
     def update_data(self) -> None:
+        if not self.is_visible:
+            return
         try:
             self.container.reload()
         except errors.NotFound:
@@ -92,6 +97,8 @@ class ContainerWidget(Static):
         for stat in self.container.stats(stream=True, decode=True):
             if not self.mounted:  # finish the thread
                 return None
+            if not self.is_visible:
+                continue
             if self.running:
                 mem_mb, mem_percent = get_mem_usage(stat)
                 cpu_text = f"CPU: {get_cpu_usage(stat):.1f}%"
@@ -104,6 +111,12 @@ class ContainerWidget(Static):
 
     def on_unmount(self):
         self.mounted = False
+
+    def on_hide(self):
+        self.is_visible = False
+
+    def on_show(self):
+        self.is_visible = True
 
 
 class StatusButtons(Static):

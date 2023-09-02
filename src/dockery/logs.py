@@ -1,6 +1,6 @@
 import time
 from textual.app import ComposeResult
-from textual.widgets import Static, TextLog, Tabs
+from textual.widgets import Static, RichLog, Tabs
 from textual.reactive import reactive
 from textual.containers import VerticalScroll
 from docker.models.containers import Container
@@ -30,7 +30,7 @@ class LogsButton(Static):
         yield CustomButton("Ξ Logs", color="blue")
 
 
-class LogsContainer(TextLog):
+class LogsContainer(RichLog):
     last_log = reactive("")
 
     def __init__(self, container: Container, **kargs):

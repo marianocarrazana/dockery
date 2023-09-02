@@ -1,14 +1,14 @@
 
 [project]
 name = "dockery"
-version = "0.8.0"
+version = "0.8.1"
 description = "Graphical interface for Docker in your console"
 authors = [
     {name = "Mariano Carrazana", email = "marianocarrazana@gmail.com"},
 ]
 dependencies = [
     "docker>=6.1.3",
-    "textual>=0.28.0",
+    "textual==0.35.1",
     "click>=8.1.3",
     "pyyaml>=6.0",
 ]
